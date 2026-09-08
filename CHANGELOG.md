@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1] - 2026-09-08
+
+### Fixed
+
+- `apply`: a version number in a badge now needs a source in the repo (`engines`, CI matrix, `.nvmrc`, ...); it invented `node ≥18` twice.
+- `apply`: the table of contents rule counts the sections it is about to write, so the five default sections alone get one.
+- `apply`: preserved sections are byte-for-byte, no ticking Roadmap checkboxes.
+
 ## [0.2.0] - 2026-09-07
 
 ### Added
