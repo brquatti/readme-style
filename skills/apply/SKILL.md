@@ -96,10 +96,12 @@ you are about to write (template plus preserved). 5 or more: include it, with an
 ## Hard rules
 
 - NEVER invent features. Every claim must be backed by code you read.
+- Do not run the project's code, tests, or build. Read them; running is not yours to do.
 - NEVER add a License or Author/Contact section.
 - Badges via `img.shields.io` only for verifiable facts: language, platform, key libraries,
   status. A CI badge only if `.github/workflows/*.yml` exists. A version badge only if there
-  is a git tag or a published package version. Never "tests passing" or "PRs welcome".
+  is a git tag or a `version` field in the package manifest (`package.json`, `pyproject`,
+  `Cargo.toml`, ...). Never "tests passing" or "PRs welcome".
 - A version number inside a badge (for example `node-≥18`) needs a source you read:
   `engines`, a CI matrix, `.nvmrc`, `pyproject`, a lockfile. No source, no number: use the
   bare name (`node`, `python`).

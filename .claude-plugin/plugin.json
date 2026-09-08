@@ -1,6 +1,6 @@
 {
   "name": "readme-style",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Generate and maintain README.md in one consistent layout: centered header, real badges, table of contents, emoji sections. Reads the actual code, never invents features.",
   "author": {
     "name": "Bruno Quatti"
