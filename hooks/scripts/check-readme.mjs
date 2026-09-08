@@ -87,15 +87,11 @@ export function hook(cwd, env = {}) {
   return `readme-style: README.md in ${root} is not in the readme-style layout (missing: ${labels}). The user can run /readme-style:apply to update it. ${NOTE_TAIL}`;
 }
 
-// Report mode. `args` is the raw skill argument string; the first token that is an
-// existing directory becomes the target, otherwise the repo root (or cwd).
+// Report mode. `args` is the raw skill argument string; its first token becomes the
+// target when it is an existing directory, otherwise the repo root (or cwd).
 export function report(cwd, args = '') {
-  const explicit = args
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((t) => path.resolve(cwd, t))
-    .find(isDir);
-  const target = explicit || findRepoRoot(cwd) || path.resolve(cwd);
+  const first = path.resolve(cwd, args.trim().split(/\s+/)[0] || '.');
+  const target = args.trim() && isDir(first) ? first : findRepoRoot(cwd) || path.resolve(cwd);
   const root = findRepoRoot(target);
   const config = { ...(root ? loadConfig(root) : {}), ...loadConfig(target) };
 

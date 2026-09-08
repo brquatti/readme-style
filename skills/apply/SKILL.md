@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash(git:*), Bash(ls:*), Bash(tree
 # Apply the readme-style layout
 
 Arguments: `$ARGUMENTS` (a target path, free-text instructions, `--dry-run`, or nothing).
-Target: the first argument that is a directory; otherwise `${CLAUDE_PROJECT_DIR}`.
+Target: the `target:` line of the report below.
 
 Current status, from the plugin's own checker:
 
