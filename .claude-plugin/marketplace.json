@@ -1,14 +1,13 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "readme-style",
-  "description": "Gera e mantém README.md num padrão visual consistente em qualquer projeto.",
+  "description": "Generate and maintain README.md in one consistent layout, in any project.",
   "owner": {
     "name": "Bruno Quatti"
   },
   "plugins": [
     {
       "name": "readme-style",
-      "description": "Gera e mantém README.md num padrão visual consistente (header centralizado, badges reais, sumário, seções com emoji).",
+      "description": "Generate and maintain README.md in one consistent layout: centered header, real badges, table of contents, emoji sections. Reads the actual code, never invents features.",
       "source": "./",
       "category": "productivity"
     }
