@@ -11,6 +11,7 @@
 ![Claude Code](https://img.shields.io/badge/Claude_Code-plugin-d97757?style=for-the-badge)
 ![Node](https://img.shields.io/badge/node-%E2%89%A520-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![CI](https://img.shields.io/github/actions/workflow/status/brquatti/readme-style/ci.yml?style=for-the-badge&label=CI)
+![Version](https://img.shields.io/github/v/tag/brquatti/readme-style?style=for-the-badge&label=version)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
 </div>
@@ -43,9 +44,9 @@ readme-style: no README.md in /path/to/my-project. The user can run
 - [🧠 How it works](#-how-it-works)
 - [📦 Installation](#-installation)
 - [🚀 Usage](#-usage)
+- [🗂️ Project structure](#️-project-structure)
 - [⚙️ Configuration](#️-configuration)
 - [🎨 The generated layout](#-the-generated-layout)
-- [🗂️ Project structure](#️-project-structure)
 
 ---
 
@@ -58,7 +59,7 @@ readme-style: no README.md in /path/to/my-project. The user can run
 | 🗣️ **No slash command needed** | Ask "write a README for this project" in plain language and Claude applies the skill; `/readme-style:apply` still works. |
 | 🔎 **Read-only check** | The `readme-style:check` skill reports what is missing from the current README, backed by the same script as the hook, and changes nothing. |
 | ⚙️ **Per-project config** | An optional `.readme-style.json` sets `lang`, `sections`, and `hook`; `README_STYLE_HOOK=0` silences the hook globally. |
-| 🌐 **Language that follows you** | Uses the existing README's language, then the config, then the language you're writing in. |
+| 🌐 **Language that follows you** | Uses `lang` from `.readme-style.json` if set, else the existing README's language, else the language you're writing in. |
 | 🧩 **Preserves custom sections** | Roadmap, Contributing, FAQ, and any other section not part of the template are kept verbatim after the generated ones. |
 | 🎨 **One consistent visual style** | Centered header, real badges (no fake test/version metrics), anchored table of contents, emoji sections, `<details>` blocks for long content. |
 | 🤷 **Honest with empty repos** | An early-stage repo gets a short, honest README, not a forced structure with empty sections. |
@@ -122,6 +123,30 @@ To check without changing anything:
 
 ---
 
+## 🗂️ Project structure
+
+```text
+readme-style/
+├─ .claude-plugin/
+│  ├─ plugin.json         # plugin manifest (points at hooks/hooks.json)
+│  └─ marketplace.json    # marketplace listing (this repo itself)
+├─ skills/
+│  ├─ apply/SKILL.md      # readme-style:apply
+│  └─ check/SKILL.md      # readme-style:check
+├─ hooks/
+│  ├─ hooks.json          # SessionStart wiring
+│  └─ scripts/
+│     └─ check-readme.mjs # shared logic: hook note + --report
+├─ tests/
+│  └─ check-readme.test.mjs
+├─ CHANGELOG.md
+└─ .github/workflows/ci.yml   # node --test + claude plugin validate --strict
+```
+
+Run the tests locally with `node --test tests/*.test.mjs`.
+
+---
+
 ## ⚙️ Configuration
 
 An optional `.readme-style.json` at the repo root:
@@ -135,7 +160,7 @@ An optional `.readme-style.json` at the repo root:
 ```
 
 - `lang` — forces the README language (otherwise: existing README language,
-  then the language you write in).
+  then the language you write in, as above).
 - `sections` — overrides the default section list and order.
 - `hook` — set to `false` to silence the `SessionStart` nudge for this repo.
   `README_STYLE_HOOK=0` silences it globally, for every project.
@@ -170,32 +195,8 @@ An optional `.readme-style.json` at the repo root:
 ```
 
 Rules the skill always follows: no invented features, no License or
-Author/Contact section, no "tests passing"/"version"/"PRs welcome" badge
-without a real CI workflow or public versioning behind it.
-
----
-
-## 🗂️ Project structure
-
-```text
-readme-style/
-├─ .claude-plugin/
-│  ├─ plugin.json         # plugin manifest (points at hooks/hooks.json)
-│  └─ marketplace.json    # marketplace listing (this repo itself)
-├─ skills/
-│  ├─ apply/SKILL.md      # readme-style:apply
-│  └─ check/SKILL.md      # readme-style:check
-├─ hooks/
-│  ├─ hooks.json          # SessionStart wiring
-│  └─ scripts/
-│     └─ check-readme.mjs # shared logic: hook note + --report
-├─ tests/
-│  └─ check-readme.test.mjs
-├─ CHANGELOG.md
-└─ .github/workflows/ci.yml   # node --test + claude plugin validate --strict
-```
-
-Run the tests locally with `node --test tests/*.test.mjs`.
+Author/Contact section, never a "tests passing" or "PRs welcome" badge, and a
+CI or version badge only when a real workflow or git tag/package version backs it.
 
 <div align="center">
 
