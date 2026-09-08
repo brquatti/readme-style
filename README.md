@@ -54,7 +54,7 @@ readme-style: no README.md in /path/to/my-project. Run /readme-style:apply to ge
 | | |
 |---|---|
 | 🔍 **Automatic nudge** | Opening any project in Claude Code runs a `SessionStart` hook that checks whether the README exists and follows the layout. If not, it shows a one-line note that only *suggests* running the skill. Never writes anything on its own, never blocks the session. |
-| ✍️ **Generation from the real code** | The `readme-style:apply` skill reads the project's actual code (dependencies, entry points, modules, CI workflows, git tags) before writing — no invented features. |
+| ✍️ **Generation from the real code** | The `readme-style:apply` skill reads the project's actual code (dependencies, entry points, modules, CI workflows, git tags) before writing — no invented features. It reads, never runs: no tests, no build, no CLI of yours gets executed. |
 | 🗣️ **No slash command needed** | Ask "write a README for this project" in plain language and Claude applies the skill; `/readme-style:apply` still works. |
 | 🔎 **Read-only check** | The `readme-style:check` skill reports what is missing from the current README, backed by the same script as the hook, and changes nothing. |
 | ⚙️ **Per-project config** | An optional `.readme-style.json` sets `lang`, `sections`, and `hook`; `README_STYLE_HOOK=0` silences the hook globally. |
@@ -70,18 +70,20 @@ readme-style: no README.md in /path/to/my-project. Run /readme-style:apply to ge
 - **`SessionStart` hook** (`hooks/scripts/check-readme.mjs`, wired through
   `hooks/hooks.json`) runs once per new session (`startup` matcher only, not on
   resume, clear, compact, or fork). It fails open: any error is swallowed, a
-  missing `node` included, and never blocks the session start. It walks up from the current directory to find the
-  git repo root, checks for a `README.md` there, and looks for the layout's
-  marks (a centered header with an emoji `# H1`, a shields.io badge, at least two
-  emoji `##` sections) reading the whole file. If something is missing, it
-  emits a one-line, neutral note naming exactly what is missing: shown to you
-  (`systemMessage`) and added to the model's context (`additionalContext`) with
-  an instruction not to run `apply` unless asked. `README_STYLE_HOOK=0` or
-  `{"hook": false}` in `.readme-style.json` silences it.
+  missing `node` included, and never blocks the session start. It walks up from
+  the current directory to find the git repo root, checks for a `README.md`
+  there (any letter case; a `README.rst` or a bare `README` is left alone), and
+  looks for the layout's marks (a centered header with an emoji `# H1`, a
+  shields.io badge, at least two emoji `##` sections) reading the whole file. If
+  something is missing, it emits a one-line, neutral note naming exactly what is
+  missing: shown to you (`systemMessage`) and added to the model's context
+  (`additionalContext`) with an instruction not to run `apply` unless asked.
+  `README_STYLE_HOOK=0` or `{"hook": false}` in `.readme-style.json` silences it.
 - **`readme-style:apply` skill** (`skills/apply/SKILL.md`) instructs Claude to
   explore the project's real code and write or rewrite `README.md` following
-  the template below — and nothing else: it doesn't commit, and its write
-  permission is scoped to `README.md`. Accepts a target path (first argument
+  the template below — and nothing else: it doesn't commit, it never runs the
+  project's code, tests, or build, and its write permission is scoped to
+  `README.md`. Accepts a target path (first argument
   only), free-text instructions (for example "only the Usage section"), and
   `--dry-run` to print the proposed README without writing it.
 - **`readme-style:check` skill** (`skills/check/SKILL.md`) runs the same script
