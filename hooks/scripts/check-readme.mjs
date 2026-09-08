@@ -13,9 +13,10 @@ const CONFIG_FILE = '.readme-style.json';
 
 const CHECKS = {
   centeredHeader: (t) => t.includes('align="center"'),
-  emojiTitle: (t) => /^# \p{Extended_Pictographic}/mu.test(t),
+  // RGI_Emoji covers flags and keycaps; Extended_Pictographic covers bare symbols like ⚙.
+  emojiTitle: (t) => /^# (?:\p{RGI_Emoji}|\p{Extended_Pictographic})/mv.test(t),
   badges: (t) => t.includes('img.shields.io'),
-  emojiSections: (t) => (t.match(/^## \p{Extended_Pictographic}/gmu) || []).length >= 2,
+  emojiSections: (t) => (t.match(/^## (?:\p{RGI_Emoji}|\p{Extended_Pictographic})/gmv) || []).length >= 2,
 };
 
 export const LABELS = {
@@ -66,9 +67,7 @@ function isDir(p) {
   }
 }
 
-const NOTE_TAIL = 'Do not run it unless the user asks.';
-
-// Hook mode. Returns '' when there is nothing to say.
+// Hook mode. Returns '' when there is nothing to say, else a one-line note for the user.
 export function hook(cwd, env = {}) {
   if (env.README_STYLE_HOOK === '0') return '';
   const root = findRepoRoot(cwd);
@@ -77,25 +76,21 @@ export function hook(cwd, env = {}) {
 
   const readme = findReadme(root);
   if (!readme) {
-    return `readme-style: no README.md in ${root}. The user can run /readme-style:apply to generate one. ${NOTE_TAIL}`;
+    return `readme-style: no README.md in ${root}. Run /readme-style:apply to generate one.`;
   }
   if (!readme.markdown) return '';
 
   const { ok, missing } = analyze(fs.readFileSync(readme.file, 'utf8'));
   if (ok) return '';
   const labels = missing.map((k) => LABELS[k]).join('; ');
-  return `readme-style: README.md in ${root} is not in the readme-style layout (missing: ${labels}). The user can run /readme-style:apply to update it. ${NOTE_TAIL}`;
+  return `readme-style: README.md in ${root} is not in the readme-style layout (missing: ${labels}). Run /readme-style:apply to update it.`;
 }
 
-// Report mode. `args` is the raw skill argument string; the first token that is an
-// existing directory becomes the target, otherwise the repo root (or cwd).
+// Report mode. `args` is the raw skill argument string; its first token becomes the
+// target when it is an existing directory, otherwise the repo root (or cwd).
 export function report(cwd, args = '') {
-  const explicit = args
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((t) => path.resolve(cwd, t))
-    .find(isDir);
-  const target = explicit || findRepoRoot(cwd) || path.resolve(cwd);
+  const first = path.resolve(cwd, args.trim().split(/\s+/)[0] || '.');
+  const target = args.trim() && isDir(first) ? first : findRepoRoot(cwd) || path.resolve(cwd);
   const root = findRepoRoot(target);
   const config = { ...(root ? loadConfig(root) : {}), ...loadConfig(target) };
 
@@ -122,8 +117,17 @@ function main() {
   try {
     const argv = process.argv.slice(2);
     const cwd = process.env.CLAUDE_PROJECT_DIR || process.cwd();
-    const out = argv[0] === '--report' ? report(cwd, argv.slice(1).join(' ')) : hook(cwd, process.env);
-    if (out) process.stdout.write(out);
+    if (argv[0] === '--report') return process.stdout.write(report(cwd, argv.slice(1).join(' ')));
+    const note = hook(cwd, process.env);
+    if (!note) return;
+    // systemMessage is shown to the user; additionalContext goes to the model.
+    process.stdout.write(JSON.stringify({
+      systemMessage: note,
+      hookSpecificOutput: {
+        hookEventName: 'SessionStart',
+        additionalContext: `${note} (This note was shown to the user. Do not run it unless the user asks.)`,
+      },
+    }));
   } catch {
     // fail open: say nothing, exit 0
   }

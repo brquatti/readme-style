@@ -1,7 +1,6 @@
 {
   "name": "readme-style",
-  "displayName": "readme-style",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Generate and maintain README.md in one consistent layout: centered header, real badges, table of contents, emoji sections. Reads the actual code, never invents features.",
   "author": {
     "name": "Bruno Quatti"
@@ -9,6 +8,5 @@
   "homepage": "https://github.com/brquatti/readme-style",
   "repository": "https://github.com/brquatti/readme-style",
   "license": "MIT",
-  "keywords": ["readme", "docs", "documentation"],
-  "hooks": "./hooks/hooks.json"
+  "keywords": ["readme", "docs", "documentation"]
 }

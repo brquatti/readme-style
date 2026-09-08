@@ -2,13 +2,13 @@
 name: apply
 description: Generate or update README.md in the readme-style layout (centered header, real badges, table of contents, emoji sections) from the project's actual code. Use when the user asks to write, create, generate, update, refresh, or fix a README.
 argument-hint: "[path] [instructions | --dry-run]"
-allowed-tools: Read, Write, Edit, Grep, Glob, Bash(git:*), Bash(ls:*), Bash(tree:*), Bash(find:*), Bash(cat:*), Bash(node:*)
+allowed-tools: Read, Edit(README.md), Grep, Glob, Bash(git:*), Bash(ls:*), Bash(tree:*), Bash(find:*), Bash(node:*)
 ---
 
 # Apply the readme-style layout
 
 Arguments: `$ARGUMENTS` (a target path, free-text instructions, `--dry-run`, or nothing).
-Target: the first argument that is a directory; otherwise `${CLAUDE_PROJECT_DIR}`.
+Target: the `target:` line of the report below.
 
 Current status, from the plugin's own checker:
 
@@ -84,10 +84,12 @@ you are about to write (template plus preserved). 5 or more: include it, with an
 
 ## 4. Preserve what is not yours
 
-- Every existing section whose heading is not in the section list (Roadmap, Contributing,
-  Changelog, FAQ, ...) is kept verbatim, in its original order, after the template sections
-  and before the closing line. Verbatim means byte for byte: do not tick checkboxes or
-  reword items even when the code shows they are done; mention it in your report instead.
+- An existing section that covers the same ground as a template section (Install, Getting
+  started, Overview, Setup, ...) is merged into that template section, not kept as a copy.
+- Every other existing section (Roadmap, Contributing, Changelog, FAQ, ...) is kept
+  verbatim, in its original order, after the template sections and before the closing
+  line. Verbatim means byte for byte: do not tick checkboxes or reword items even when the
+  code shows they are done; mention it in your report instead.
 - Never drop links, images, or examples that are still true just because they do not fit
   the template.
 

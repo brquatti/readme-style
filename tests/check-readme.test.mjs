@@ -54,6 +54,13 @@ test('analyze: centered header + badge alone is not enough', () => {
   assert.deepEqual(analyze(FAKE).missing, ['emojiTitle', 'emojiSections']);
 });
 
+test('analyze: flags, keycaps, ZWJ sequences, and bare symbols all count as emoji', () => {
+  for (const e of ['🇧🇷', '#️⃣', '👨‍💻', '👍🏽', '🗂️', '⚙']) {
+    assert.equal(analyze(STYLED.replace('# 📐', `# ${e}`).replace('## ✨', `## ${e}`)).ok, true, e);
+  }
+  assert.deepEqual(analyze(STYLED.replace('# 📐', '# 1')).missing, ['emojiTitle']);
+});
+
 test('analyze: reads the whole file, not only the first 3000 chars', () => {
   const late = '# intro\n\n' + 'a'.repeat(3100) + '\n\n' + STYLED;
   assert.equal(analyze(late).ok, true);
@@ -86,10 +93,8 @@ test('hook: the three promised scenarios', () => {
   assert.equal(hook(repo('styled', { 'README.md': STYLED })), '');
 });
 
-test('hook: note is advisory and names what is missing', () => {
-  const out = hook(repo('fake', { 'README.md': FAKE }));
-  assert.match(out, /H1 title starting with an emoji/);
-  assert.match(out, /Do not run it unless the user asks/);
+test('hook: note names what is missing', () => {
+  assert.match(hook(repo('fake', { 'README.md': FAKE })), /H1 title starting with an emoji/);
 });
 
 test('hook: checks the repo root README when started in a subdirectory', () => {
@@ -124,15 +129,18 @@ test('report: describes status, config, and honours an explicit target dir', () 
   assert.match(sub, /status: off-layout/);
   assert.match(sub, /missing: centered header/);
   assert.match(sub, /lang: en/, 'inherits the repo-root config');
+  assert.match(report(dir, 'fix the packages section'), /status: ok/, 'only the first token can be a path');
 
   assert.match(report(repo('rep-none')), /status: missing/);
   assert.match(report(repo('rep-rst', { 'README.rst': 'x' })), /status: skipped/);
 });
 
-test('cli: exits 0 and prints the note, honouring CLAUDE_PROJECT_DIR', () => {
+test('cli: exits 0 and prints the note for the user and the model, honouring CLAUDE_PROJECT_DIR', () => {
   const dir = repo('cli', { 'README.md': PLAIN });
-  const out = execFileSync('node', [SCRIPT], { env: { ...process.env, CLAUDE_PROJECT_DIR: dir } }).toString();
-  assert.match(out, /not in the readme-style layout/);
+  const out = JSON.parse(execFileSync('node', [SCRIPT], { env: { ...process.env, CLAUDE_PROJECT_DIR: dir } }).toString());
+  assert.match(out.systemMessage, /not in the readme-style layout/);
+  assert.equal(out.hookSpecificOutput.hookEventName, 'SessionStart');
+  assert.match(out.hookSpecificOutput.additionalContext, /Do not run it unless the user asks/);
   const rep = execFileSync('node', [SCRIPT, '--report'], { cwd: dir, env: { ...process.env, CLAUDE_PROJECT_DIR: '' } }).toString();
   assert.match(rep, /^readme-style report/);
 });
@@ -142,9 +150,9 @@ test('cli: fails open on an unreadable project dir', () => {
   assert.equal(out, '');
 });
 
-test('manifests: hooks.json wires the script on startup only, plugin.json points at it', () => {
+test('manifests: hooks.json wires the script on startup only and is not also listed in plugin.json', () => {
   const plugin = JSON.parse(fs.readFileSync(path.join(ROOT, '.claude-plugin/plugin.json'), 'utf8'));
-  assert.equal(plugin.hooks, './hooks/hooks.json');
+  assert.equal(plugin.hooks, undefined, 'hooks/hooks.json loads on its own; listing it again fails the plugin load');
   assert.match(plugin.version, /^\d+\.\d+\.\d+$/);
   const hooks = JSON.parse(fs.readFileSync(path.join(ROOT, 'hooks/hooks.json'), 'utf8'));
   const [entry] = hooks.hooks.SessionStart;

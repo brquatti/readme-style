@@ -9,7 +9,7 @@
 <br/>
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-plugin-d97757?style=for-the-badge)
-![Node](https://img.shields.io/badge/node-%E2%89%A520-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Node](https://img.shields.io/badge/node-%E2%89%A522-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![CI](https://img.shields.io/github/actions/workflow/status/brquatti/readme-style/ci.yml?style=for-the-badge&label=CI)
 ![Version](https://img.shields.io/github/v/tag/brquatti/readme-style?style=for-the-badge&label=version)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
@@ -21,15 +21,14 @@
 > Good READMEs cost time, and without a shared standard every repo ends up at a
 > different level of polish — some cared for, others forgotten. **readme-style**
 > fixes that: a skill that reads the real code and writes the README in the same
-> consistent format, plus an automatic, silent nudge (it never writes anything on
-> its own) every time you open a project whose README is not in that style yet.
+> consistent format, plus an automatic nudge (it never writes anything on its
+> own) every time you open a project whose README is not in that style yet.
 
 ```console
 $ cd my-project && claude
 
-# note added to Claude's context at session start (hook stdout):
-readme-style: no README.md in /path/to/my-project. The user can run
-/readme-style:apply to generate one. Do not run it unless the user asks.
+# one-line note at session start, shown to you and given to the model:
+readme-style: no README.md in /path/to/my-project. Run /readme-style:apply to generate one.
 
 > /readme-style:apply
   Reading the project's real code...
@@ -54,13 +53,13 @@ readme-style: no README.md in /path/to/my-project. The user can run
 
 | | |
 |---|---|
-| 🔍 **Automatic nudge** | Opening any project in Claude Code runs a silent `SessionStart` hook that checks whether the README exists and follows the layout — it only *suggests* running the skill. Never writes anything on its own, never blocks the session. |
+| 🔍 **Automatic nudge** | Opening any project in Claude Code runs a `SessionStart` hook that checks whether the README exists and follows the layout. If not, it shows a one-line note that only *suggests* running the skill. Never writes anything on its own, never blocks the session. |
 | ✍️ **Generation from the real code** | The `readme-style:apply` skill reads the project's actual code (dependencies, entry points, modules, CI workflows, git tags) before writing — no invented features. |
 | 🗣️ **No slash command needed** | Ask "write a README for this project" in plain language and Claude applies the skill; `/readme-style:apply` still works. |
 | 🔎 **Read-only check** | The `readme-style:check` skill reports what is missing from the current README, backed by the same script as the hook, and changes nothing. |
 | ⚙️ **Per-project config** | An optional `.readme-style.json` sets `lang`, `sections`, and `hook`; `README_STYLE_HOOK=0` silences the hook globally. |
 | 🌐 **Language that follows you** | Uses `lang` from `.readme-style.json` if set, else the existing README's language, else the language you're writing in. |
-| 🧩 **Preserves custom sections** | Roadmap, Contributing, FAQ, and any other section not part of the template are kept verbatim after the generated ones. |
+| 🧩 **Preserves custom sections** | Roadmap, Contributing, FAQ, and any other section not part of the template are kept verbatim after the generated ones. A section that covers the same ground as a template one (Getting started, Install, Overview) is merged into it, not duplicated. |
 | 🎨 **One consistent visual style** | Centered header, real badges (no fake test/version metrics), anchored table of contents, emoji sections, `<details>` blocks for long content. |
 | 🤷 **Honest with empty repos** | An early-stage repo gets a short, honest README, not a forced structure with empty sections. |
 
@@ -75,15 +74,16 @@ readme-style: no README.md in /path/to/my-project. The user can run
   git repo root, checks for a `README.md` there, and looks for the layout's
   marks (a centered header with an emoji `# H1`, a shields.io badge, at least two
   emoji `##` sections) reading the whole file. If something is missing, it
-  prints a one-line, neutral note naming exactly what is missing and telling the
-  model not to run `apply` unless asked. `README_STYLE_HOOK=0` or
+  emits a one-line, neutral note naming exactly what is missing: shown to you
+  (`systemMessage`) and added to the model's context (`additionalContext`) with
+  an instruction not to run `apply` unless asked. `README_STYLE_HOOK=0` or
   `{"hook": false}` in `.readme-style.json` silences it.
 - **`readme-style:apply` skill** (`skills/apply/SKILL.md`) instructs Claude to
   explore the project's real code and write or rewrite `README.md` following
-  the template below — and nothing else: it doesn't commit, doesn't touch any
-  other file. Accepts a target path, free-text instructions (for example "only
-  the Usage section"), and `--dry-run` to print the proposed README without
-  writing it.
+  the template below — and nothing else: it doesn't commit, and its write
+  permission is scoped to `README.md`. Accepts a target path (first argument
+  only), free-text instructions (for example "only the Usage section"), and
+  `--dry-run` to print the proposed README without writing it.
 - **`readme-style:check` skill** (`skills/check/SKILL.md`) runs the same script
   in report mode (`--report`) and relays the status, what's missing, and the
   active config, without touching any file.
@@ -128,7 +128,7 @@ To check without changing anything:
 ```text
 readme-style/
 ├─ .claude-plugin/
-│  ├─ plugin.json         # plugin manifest (points at hooks/hooks.json)
+│  ├─ plugin.json         # plugin manifest
 │  └─ marketplace.json    # marketplace listing (this repo itself)
 ├─ skills/
 │  ├─ apply/SKILL.md      # readme-style:apply
@@ -161,7 +161,8 @@ An optional `.readme-style.json` at the repo root:
 
 - `lang` — forces the README language (otherwise: existing README language,
   then the language you write in, as above).
-- `sections` — overrides the default section list and order.
+- `sections` — overrides the default section list and order. Keep the emoji in each
+  entry: the layout check wants at least two `## <emoji> Section` headings.
 - `hook` — set to `false` to silence the `SessionStart` nudge for this repo.
   `README_STYLE_HOOK=0` silences it globally, for every project.
 
@@ -195,8 +196,10 @@ An optional `.readme-style.json` at the repo root:
 ```
 
 Rules the skill always follows: no invented features, no License or
-Author/Contact section, never a "tests passing" or "PRs welcome" badge, and a
-CI or version badge only when a real workflow or git tag/package version backs it.
+Author/Contact section, never a "tests passing" or "PRs welcome" badge, a CI or
+version badge only when a real workflow or git tag/package version backs it, and
+a version number inside a badge (`node-≥22`) only with a source in the repo
+(`engines`, CI matrix, `.nvmrc`, ...).
 
 <div align="center">
 
