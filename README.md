@@ -68,9 +68,9 @@ readme-style: no README.md in /path/to/my-project. Run /readme-style:apply to ge
 ## 🧠 How it works
 
 - **`SessionStart` hook** (`hooks/scripts/check-readme.mjs`, wired through
-  `hooks/hooks.json`) runs once per new session (`startup` matcher only — not on
-  resume, clear, or compact). It fails open: any error is swallowed and never
-  blocks the session start. It walks up from the current directory to find the
+  `hooks/hooks.json`) runs once per new session (`startup` matcher only, not on
+  resume, clear, compact, or fork). It fails open: any error is swallowed, a
+  missing `node` included, and never blocks the session start. It walks up from the current directory to find the
   git repo root, checks for a `README.md` there, and looks for the layout's
   marks (a centered header with an emoji `# H1`, a shields.io badge, at least two
   emoji `##` sections) reading the whole file. If something is missing, it
