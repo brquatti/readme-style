@@ -195,7 +195,7 @@ readme-style/
 └─ .github/workflows/ci.yml   # node --test + claude plugin validate --strict
 ```
 
-Run the tests locally with `node --test "tests/*.test.mjs"`.
+Run the tests locally with `node --test tests/*.test.mjs`.
 
 <div align="center">
 
