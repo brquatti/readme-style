@@ -93,10 +93,8 @@ test('hook: the three promised scenarios', () => {
   assert.equal(hook(repo('styled', { 'README.md': STYLED })), '');
 });
 
-test('hook: note is advisory and names what is missing', () => {
-  const out = hook(repo('fake', { 'README.md': FAKE }));
-  assert.match(out, /H1 title starting with an emoji/);
-  assert.match(out, /Do not run it unless the user asks/);
+test('hook: note names what is missing', () => {
+  assert.match(hook(repo('fake', { 'README.md': FAKE })), /H1 title starting with an emoji/);
 });
 
 test('hook: checks the repo root README when started in a subdirectory', () => {
@@ -137,10 +135,12 @@ test('report: describes status, config, and honours an explicit target dir', () 
   assert.match(report(repo('rep-rst', { 'README.rst': 'x' })), /status: skipped/);
 });
 
-test('cli: exits 0 and prints the note, honouring CLAUDE_PROJECT_DIR', () => {
+test('cli: exits 0 and prints the note for the user and the model, honouring CLAUDE_PROJECT_DIR', () => {
   const dir = repo('cli', { 'README.md': PLAIN });
-  const out = execFileSync('node', [SCRIPT], { env: { ...process.env, CLAUDE_PROJECT_DIR: dir } }).toString();
-  assert.match(out, /not in the readme-style layout/);
+  const out = JSON.parse(execFileSync('node', [SCRIPT], { env: { ...process.env, CLAUDE_PROJECT_DIR: dir } }).toString());
+  assert.match(out.systemMessage, /not in the readme-style layout/);
+  assert.equal(out.hookSpecificOutput.hookEventName, 'SessionStart');
+  assert.match(out.hookSpecificOutput.additionalContext, /Do not run it unless the user asks/);
   const rep = execFileSync('node', [SCRIPT, '--report'], { cwd: dir, env: { ...process.env, CLAUDE_PROJECT_DIR: '' } }).toString();
   assert.match(rep, /^readme-style report/);
 });
