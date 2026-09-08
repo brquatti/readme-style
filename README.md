@@ -9,7 +9,7 @@
 <br/>
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-plugin-d97757?style=for-the-badge)
-![Node](https://img.shields.io/badge/node-%E2%89%A520-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Node](https://img.shields.io/badge/node-%E2%89%A522-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![CI](https://img.shields.io/github/actions/workflow/status/brquatti/readme-style/ci.yml?style=for-the-badge&label=CI)
 ![Version](https://img.shields.io/github/v/tag/brquatti/readme-style?style=for-the-badge&label=version)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
@@ -161,7 +161,8 @@ An optional `.readme-style.json` at the repo root:
 
 - `lang` — forces the README language (otherwise: existing README language,
   then the language you write in, as above).
-- `sections` — overrides the default section list and order.
+- `sections` — overrides the default section list and order. Keep the emoji in each
+  entry: the layout check wants at least two `## <emoji> Section` headings.
 - `hook` — set to `false` to silence the `SessionStart` nudge for this repo.
   `README_STYLE_HOOK=0` silences it globally, for every project.
 

@@ -1,6 +1,5 @@
 {
   "name": "readme-style",
-  "displayName": "readme-style",
   "version": "0.2.1",
   "description": "Generate and maintain README.md in one consistent layout: centered header, real badges, table of contents, emoji sections. Reads the actual code, never invents features.",
   "author": {
