@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4] - 2026-09-08
+
+### Fixed
+
+- `apply` template said "strong one-line tagline"; the skill wrapped the H2 subtitle in bold for no reason. Now just "one-line tagline".
+- README's own Node badge said `≥22` (the CI matrix) while the plugin runs on Node 18 since 0.2.3. Badge now says what the hook actually requires.
+
 ## [0.2.3] - 2026-09-08
 
 ### Fixed

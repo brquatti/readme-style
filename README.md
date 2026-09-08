@@ -9,7 +9,7 @@
 <br/>
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-plugin-d97757?style=for-the-badge)
-![Node](https://img.shields.io/badge/node-%E2%89%A522-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Node](https://img.shields.io/badge/node-%E2%89%A518-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![CI](https://img.shields.io/github/actions/workflow/status/brquatti/readme-style/ci.yml?style=for-the-badge&label=CI)
 ![Version](https://img.shields.io/github/v/tag/brquatti/readme-style?style=for-the-badge&label=version)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
@@ -200,7 +200,7 @@ An optional `.readme-style.json` at the repo root:
 Rules the skill always follows: no invented features, no License or
 Author/Contact section, never a "tests passing" or "PRs welcome" badge, a CI or
 version badge only when a real workflow or git tag/package version backs it, and
-a version number inside a badge (`node-≥22`) only with a source in the repo
+a version number inside a badge (`node-≥18`) only with a source in the repo
 (`engines`, CI matrix, `.nvmrc`, ...).
 
 <div align="center">
