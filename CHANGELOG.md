@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.2] - 2026-09-08
+
+### Fixed
+
+- The plugin failed to load on Claude Code 2.1.x: `hooks/hooks.json` is loaded on its own, and listing it again in `plugin.json` counts as a duplicate. `claude plugin validate --strict` does not catch it; the tests now do.
+- `apply` target: only the first argument can be a path. Any later word that happened to name a directory (`tests`, `docs`, `src`) used to become the target.
+- `apply`: a section that covers the same ground as a template section (Getting started, Install, Overview) is merged into it instead of being kept as a duplicate.
+- Layout check: flags and keycaps (`🇧🇷`, `#️⃣`) count as emoji.
+
+### Changed
+
+- The hook note is now shown to the user at session start (`systemMessage`) as well as given to the model; wording and behaviour otherwise unchanged.
+- `apply` may only write `README.md` without asking: `Edit(README.md)` replaces the blanket Write/Edit grant. `Bash(cat:*)` dropped, Read covers it.
+- CI runs on Node 22 and 24 (20 is end-of-life) and once per PR.
+
 ## [0.2.1] - 2026-09-08
 
 ### Fixed
