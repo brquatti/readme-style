@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.3] - 2026-09-08
+
+### Fixed
+
+- The hook printed `node: command not found` at every session start on machines without Node on the PATH (Claude Code's native installer does not need it). It now stays silent and exits 0.
+- The layout check failed to parse on Node 18 (`\p{RGI_Emoji}` needs the regex `v` flag). Same emoji coverage with the `u` flag.
+- `apply` ran the project's tests and CLI while "reading the code": unasked permission prompts, foreign code executing. The skill now reads only.
+- `apply`: the version-badge rule names its sources (git tag, or the manifest's `version` field); it used to flip between runs on "published package version".
+
 ## [0.2.2] - 2026-09-08
 
 ### Fixed
