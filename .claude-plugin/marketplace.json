@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "readme-style",
-      "description": "Generate and maintain README.md in one consistent layout: centered header, real badges, table of contents, emoji sections. Reads the actual code, never invents features.",
+      "description": "Generate and maintain README.md in one consistent layout: centered header, real badges, table of contents, emoji sections. Syncs the GitHub repo description to match. Reads the actual code, never invents features.",
       "source": "./",
       "category": "productivity"
     }

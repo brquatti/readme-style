@@ -2,7 +2,7 @@
 name: apply
 description: Generate or update README.md in the readme-style layout (centered header, real badges, table of contents, emoji sections) from the project's actual code. Use when the user asks to write, create, generate, update, refresh, or fix a README.
 argument-hint: "[path] [instructions | --dry-run]"
-allowed-tools: Read, Edit(README.md), Grep, Glob, Bash(git:*), Bash(ls:*), Bash(tree:*), Bash(find:*), Bash(node:*)
+allowed-tools: Read, Edit(README.md), Grep, Glob, Bash(git:*), Bash(gh repo view:*), Bash(gh repo edit:*), Bash(ls:*), Bash(tree:*), Bash(find:*), Bash(node:*)
 ---
 
 # Apply the readme-style layout
@@ -108,13 +108,24 @@ you are about to write (template plus preserved). 5 or more: include it, with an
 - Empty or early-stage repo: say so in a short, honest README instead of forcing the full
   structure with empty sections.
 - Direct, confident tone. No corporate marketing.
-- Do not touch any file other than README.md.
+- Do not touch any file other than README.md. The GitHub repo description (step 5) is not
+  a file and is the one exception.
 - If the arguments contain `--dry-run`, print the full proposed README in the chat and
   write nothing.
 - If the arguments contain instructions (for example `only the Usage section`), follow
   them and edit only what they ask for.
 
-## 5. Report
+## 5. Sync the GitHub repo description
 
-Summarize in a few lines what changed. Do not commit or push unless the user explicitly
-asks.
+If the target has a `.git` remote pointing at GitHub, always in English regardless of the
+README's language:
+
+- Read the current description: `gh repo view --json description`.
+- Build the target one-liner from the README's tagline (the `## <one-line tagline>` line).
+- If different, set it: `gh repo edit --description "<tagline>"`.
+- No GitHub remote, or `gh` not authenticated: skip silently, do not fail the run.
+
+## 6. Report
+
+Summarize in a few lines what changed, including the description sync. Do not commit or
+push unless the user explicitly asks.
