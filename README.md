@@ -9,7 +9,7 @@
 <br/>
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-plugin-d97757?style=for-the-badge)
-![Node](https://img.shields.io/badge/node-≥18-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Node](https://img.shields.io/badge/node-%E2%89%A520-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![CI](https://img.shields.io/github/actions/workflow/status/brquatti/readme-style/ci.yml?style=for-the-badge&label=CI)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
@@ -26,8 +26,9 @@
 ```console
 $ cd my-project && claude
 
-SessionStart: readme-style: no README.md in /path/to/my-project. The user can
-run /readme-style:apply to generate one. Do not run it unless the user asks.
+# note added to Claude's context at session start (hook stdout):
+readme-style: no README.md in /path/to/my-project. The user can run
+/readme-style:apply to generate one. Do not run it unless the user asks.
 
 > /readme-style:apply
   Reading the project's real code...
@@ -53,7 +54,8 @@ run /readme-style:apply to generate one. Do not run it unless the user asks.
 | | |
 |---|---|
 | 🔍 **Automatic nudge** | Opening any project in Claude Code runs a silent `SessionStart` hook that checks whether the README exists and follows the layout — it only *suggests* running the skill. Never writes anything on its own, never blocks the session. |
-| ✍️ **Generation from the real code** | The `readme-style:apply` skill reads the project's actual code (dependencies, entry points, modules, CHANGELOG, CI) before writing — no invented features. |
+| ✍️ **Generation from the real code** | The `readme-style:apply` skill reads the project's actual code (dependencies, entry points, modules, CI workflows, git tags) before writing — no invented features. |
+| 🗣️ **No slash command needed** | Ask "write a README for this project" in plain language and Claude applies the skill; `/readme-style:apply` still works. |
 | 🔎 **Read-only check** | The `readme-style:check` skill reports what is missing from the current README, backed by the same script as the hook, and changes nothing. |
 | ⚙️ **Per-project config** | An optional `.readme-style.json` sets `lang`, `sections`, and `hook`; `README_STYLE_HOOK=0` silences the hook globally. |
 | 🌐 **Language that follows you** | Uses the existing README's language, then the config, then the language you're writing in. |
@@ -94,7 +96,7 @@ claude plugin marketplace add brquatti/readme-style
 claude plugin install readme-style@readme-style
 ```
 
-Commands from a freshly installed plugin aren't available in the session that
+Skills from a freshly installed plugin aren't available in the session that
 installed it — open a new session (or run `/reload-plugins`) before using
 `/readme-style:apply`.
 
@@ -108,8 +110,9 @@ Inside any project:
 /readme-style:apply
 ```
 
-That's it. The `SessionStart` hook already flags a README that needs
-attention, so in practice you only run the skill when it suggests it.
+Or just ask in plain language ("write a README for this project"); the skill
+is auto-invocable. The `SessionStart` hook flags a README that needs attention,
+so in practice you run it when it suggests it.
 
 To check without changing anything:
 
@@ -177,7 +180,7 @@ without a real CI workflow or public versioning behind it.
 ```text
 readme-style/
 ├─ .claude-plugin/
-│  ├─ plugin.json         # plugin manifest + hook wiring
+│  ├─ plugin.json         # plugin manifest (points at hooks/hooks.json)
 │  └─ marketplace.json    # marketplace listing (this repo itself)
 ├─ skills/
 │  ├─ apply/SKILL.md      # readme-style:apply
@@ -188,8 +191,11 @@ readme-style/
 │     └─ check-readme.mjs # shared logic: hook note + --report
 ├─ tests/
 │  └─ check-readme.test.mjs
+├─ CHANGELOG.md
 └─ .github/workflows/ci.yml   # node --test + claude plugin validate --strict
 ```
+
+Run the tests locally with `node --test "tests/*.test.mjs"`.
 
 <div align="center">
 
