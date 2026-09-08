@@ -13,9 +13,10 @@ const CONFIG_FILE = '.readme-style.json';
 
 const CHECKS = {
   centeredHeader: (t) => t.includes('align="center"'),
-  emojiTitle: (t) => /^# \p{Extended_Pictographic}/mu.test(t),
+  // RGI_Emoji covers flags and keycaps; Extended_Pictographic covers bare symbols like ⚙.
+  emojiTitle: (t) => /^# (?:\p{RGI_Emoji}|\p{Extended_Pictographic})/mv.test(t),
   badges: (t) => t.includes('img.shields.io'),
-  emojiSections: (t) => (t.match(/^## \p{Extended_Pictographic}/gmu) || []).length >= 2,
+  emojiSections: (t) => (t.match(/^## (?:\p{RGI_Emoji}|\p{Extended_Pictographic})/gmv) || []).length >= 2,
 };
 
 export const LABELS = {

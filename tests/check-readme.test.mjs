@@ -54,6 +54,13 @@ test('analyze: centered header + badge alone is not enough', () => {
   assert.deepEqual(analyze(FAKE).missing, ['emojiTitle', 'emojiSections']);
 });
 
+test('analyze: flags, keycaps, ZWJ sequences, and bare symbols all count as emoji', () => {
+  for (const e of ['🇧🇷', '#️⃣', '👨‍💻', '👍🏽', '🗂️', '⚙']) {
+    assert.equal(analyze(STYLED.replace('# 📐', `# ${e}`).replace('## ✨', `## ${e}`)).ok, true, e);
+  }
+  assert.deepEqual(analyze(STYLED.replace('# 📐', '# 1')).missing, ['emojiTitle']);
+});
+
 test('analyze: reads the whole file, not only the first 3000 chars', () => {
   const late = '# intro\n\n' + 'a'.repeat(3100) + '\n\n' + STYLED;
   assert.equal(analyze(late).ok, true);
