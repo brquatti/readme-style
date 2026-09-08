@@ -59,6 +59,7 @@ test('analyze: flags, keycaps, ZWJ sequences, and bare symbols all count as emoj
     assert.equal(analyze(STYLED.replace('# 📐', `# ${e}`).replace('## ✨', `## ${e}`)).ok, true, e);
   }
   assert.deepEqual(analyze(STYLED.replace('# 📐', '# 1')).missing, ['emojiTitle']);
+  assert.doesNotMatch(fs.readFileSync(SCRIPT, 'utf8'), /\/[gimsuy]*v[gimsuy]*(?=[\s,.);])/, 'regex v flag needs Node 20; Claude Code runs on 18');
 });
 
 test('analyze: reads the whole file, not only the first 3000 chars', () => {

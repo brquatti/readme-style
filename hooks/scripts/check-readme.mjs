@@ -11,12 +11,14 @@ import { pathToFileURL } from 'node:url';
 
 const CONFIG_FILE = '.readme-style.json';
 
+// Pictographs (⚙, 📐, ZWJ sequences start with one), flags (regional indicators), keycaps
+// (#️⃣). Unicode `u` flag only: `\p{RGI_Emoji}` needs the `v` flag, which Node 18 lacks.
+const EMOJI = '(?:\\p{Extended_Pictographic}|\\p{Regional_Indicator}|[#*0-9]\\uFE0F?\\u20E3)';
 const CHECKS = {
   centeredHeader: (t) => t.includes('align="center"'),
-  // RGI_Emoji covers flags and keycaps; Extended_Pictographic covers bare symbols like ⚙.
-  emojiTitle: (t) => /^# (?:\p{RGI_Emoji}|\p{Extended_Pictographic})/mv.test(t),
+  emojiTitle: (t) => new RegExp(`^# ${EMOJI}`, 'mu').test(t),
   badges: (t) => t.includes('img.shields.io'),
-  emojiSections: (t) => (t.match(/^## (?:\p{RGI_Emoji}|\p{Extended_Pictographic})/gmv) || []).length >= 2,
+  emojiSections: (t) => (t.match(new RegExp(`^## ${EMOJI}`, 'gmu')) || []).length >= 2,
 };
 
 export const LABELS = {
