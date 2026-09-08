@@ -2,146 +2,197 @@
 
 # 📐 readme-style
 
-## Mantenha todo README do seu perfil GitHub no mesmo padrão visual, sem esforço
+## Keep every README on your GitHub profile in the same visual style, with no effort
 
-*header centralizado · badges reais · sumário · seções com emoji · zero invenção*
+*centered header · real badges · table of contents · emoji sections · zero invention*
 
 <br/>
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-plugin-d97757?style=for-the-badge)
-![Node](https://img.shields.io/badge/node-%E2%89%A518-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Node](https://img.shields.io/badge/node-≥18-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![CI](https://img.shields.io/github/actions/workflow/status/brquatti/readme-style/ci.yml?style=for-the-badge&label=CI)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 
 </div>
 
 ---
 
-> READMEs bons custam tempo, e sem um padrão cada repo acaba com um nível diferente de
-> capricho — alguns caprichados, outros esquecidos. **readme-style** resolve isso: um
-> comando que lê o código de verdade e escreve o README no mesmo formato consistente,
-> mais um aviso automático (sem escrever nada sozinho) toda vez que você abrir um projeto
-> cujo README ainda não está nesse padrão.
+> Good READMEs cost time, and without a shared standard every repo ends up at a
+> different level of polish — some cared for, others forgotten. **readme-style**
+> fixes that: a skill that reads the real code and writes the README in the same
+> consistent format, plus an automatic, silent nudge (it never writes anything on
+> its own) every time you open a project whose README is not in that style yet.
 
 ```console
-$ cd meu-projeto && claude
+$ cd my-project && claude
 
-SessionStart: O README deste projeto não está no seu padrão pessoal
-(header centralizado, badges, sumário) — rode /readme-style:apply pra atualizar.
+SessionStart: readme-style: no README.md in /path/to/my-project. The user can
+run /readme-style:apply to generate one. Do not run it unless the user asks.
 
 > /readme-style:apply
-  Lendo o código real do projeto...
-  ✓ README.md atualizado no padrão.
+  Reading the project's real code...
+  ✓ README.md updated to the readme-style layout.
 ```
 
 ---
 
-## 📋 Sumário
+## 📋 Table of contents
 
-- [✨ Funcionalidades](#-funcionalidades)
-- [🧠 Como funciona](#-como-funciona)
-- [📦 Instalação](#-instalação)
-- [🚀 Uso](#-uso)
-- [🎨 O padrão gerado](#-o-padrão-gerado)
-- [🗂️ Estrutura do projeto](#️-estrutura-do-projeto)
+- [✨ Features](#-features)
+- [🧠 How it works](#-how-it-works)
+- [📦 Installation](#-installation)
+- [🚀 Usage](#-usage)
+- [⚙️ Configuration](#️-configuration)
+- [🎨 The generated layout](#-the-generated-layout)
+- [🗂️ Project structure](#️-project-structure)
 
 ---
 
-## ✨ Funcionalidades
+## ✨ Features
 
 | | |
 |---|---|
-| 🔍 **Aviso automático** | Ao abrir qualquer projeto no Claude Code, um hook silencioso verifica se o README existe e está no padrão — e só *sugere* rodar o comando. Nunca escreve nada sozinho, nunca trava a sessão. |
-| ✍️ **Geração baseada no código real** | O comando `/readme-style:apply` lê o código de verdade do projeto (dependências, entry points, módulos) antes de escrever — nada de funcionalidade inventada. |
-| 🎨 **Um padrão visual único** | Header centralizado, badges reais (sem métricas falsas de teste/versão), sumário com âncoras, seções com emoji, blocos `<details>` para conteúdo longo. |
-| 🤷 **Honesto com repositórios vazios** | Um repo em estágio inicial recebe um README curto e honesto, não uma estrutura forçada com seções vazias. |
+| 🔍 **Automatic nudge** | Opening any project in Claude Code runs a silent `SessionStart` hook that checks whether the README exists and follows the layout — it only *suggests* running the skill. Never writes anything on its own, never blocks the session. |
+| ✍️ **Generation from the real code** | The `readme-style:apply` skill reads the project's actual code (dependencies, entry points, modules, CHANGELOG, CI) before writing — no invented features. |
+| 🔎 **Read-only check** | The `readme-style:check` skill reports what is missing from the current README, backed by the same script as the hook, and changes nothing. |
+| ⚙️ **Per-project config** | An optional `.readme-style.json` sets `lang`, `sections`, and `hook`; `README_STYLE_HOOK=0` silences the hook globally. |
+| 🌐 **Language that follows you** | Uses the existing README's language, then the config, then the language you're writing in. |
+| 🧩 **Preserves custom sections** | Roadmap, Contributing, FAQ, and any other section not part of the template are kept verbatim after the generated ones. |
+| 🎨 **One consistent visual style** | Centered header, real badges (no fake test/version metrics), anchored table of contents, emoji sections, `<details>` blocks for long content. |
+| 🤷 **Honest with empty repos** | An early-stage repo gets a short, honest README, not a forced structure with empty sections. |
 
 ---
 
-## 🧠 Como funciona
+## 🧠 How it works
 
-- **Hook `SessionStart`** (`hooks/scripts/check-readme.mjs`) roda a cada sessão nova. Falha
-  sempre em modo aberto: qualquer erro é engolido, nunca bloqueia o início da sessão.
-  Verifica se o projeto é um repositório git, se tem `README.md`, e se esse README já tem
-  as marcas do padrão (`align="center"` + badge `img.shields.io`). Se não tiver, imprime
-  uma sugestão de uma linha.
-- **Comando `/readme-style:apply`** (`commands/apply.md`) instrui o Claude a explorar o
-  código do projeto e escrever/reescrever o `README.md` seguindo o template abaixo — e
-  nada além disso: não commita, não mexe em outro arquivo.
+- **`SessionStart` hook** (`hooks/scripts/check-readme.mjs`, wired through
+  `hooks/hooks.json`) runs once per new session (`startup` matcher only — not on
+  resume, clear, or compact). It fails open: any error is swallowed and never
+  blocks the session start. It walks up from the current directory to find the
+  git repo root, checks for a `README.md` there, and looks for the layout's
+  marks (a centered header with an emoji `# H1`, a shields.io badge, at least two
+  emoji `##` sections) reading the whole file. If something is missing, it
+  prints a one-line, neutral note naming exactly what is missing and telling the
+  model not to run `apply` unless asked. `README_STYLE_HOOK=0` or
+  `{"hook": false}` in `.readme-style.json` silences it.
+- **`readme-style:apply` skill** (`skills/apply/SKILL.md`) instructs Claude to
+  explore the project's real code and write or rewrite `README.md` following
+  the template below — and nothing else: it doesn't commit, doesn't touch any
+  other file. Accepts a target path, free-text instructions (for example "only
+  the Usage section"), and `--dry-run` to print the proposed README without
+  writing it.
+- **`readme-style:check` skill** (`skills/check/SKILL.md`) runs the same script
+  in report mode (`--report`) and relays the status, what's missing, and the
+  active config, without touching any file.
 
 ---
 
-## 📦 Instalação
+## 📦 Installation
 
 ```bash
 claude plugin marketplace add brquatti/readme-style
 claude plugin install readme-style@readme-style
 ```
 
-Comandos de um plugin recém-instalado não ficam disponíveis na sessão que fez a instalação
-— abra uma sessão nova (ou rode `/reload-plugins`) antes de usar `/readme-style:apply`.
+Commands from a freshly installed plugin aren't available in the session that
+installed it — open a new session (or run `/reload-plugins`) before using
+`/readme-style:apply`.
 
 ---
 
-## 🚀 Uso
+## 🚀 Usage
 
-Dentro de qualquer projeto:
+Inside any project:
 
 ```text
 /readme-style:apply
 ```
 
-Isso é tudo. O hook de `SessionStart` já avisa quando um README precisa de atenção, então
-na prática você só roda o comando quando ele sugerir.
+That's it. The `SessionStart` hook already flags a README that needs
+attention, so in practice you only run the skill when it suggests it.
+
+To check without changing anything:
+
+```text
+/readme-style:check
+```
 
 ---
 
-## 🎨 O padrão gerado
+## ⚙️ Configuration
+
+An optional `.readme-style.json` at the repo root:
+
+```json
+{
+  "lang": "en",
+  "sections": ["✨ Features", "🚀 Usage"],
+  "hook": false
+}
+```
+
+- `lang` — forces the README language (otherwise: existing README language,
+  then the language you write in).
+- `sections` — overrides the default section list and order.
+- `hook` — set to `false` to silence the `SessionStart` nudge for this repo.
+  `README_STYLE_HOOK=0` silences it globally, for every project.
+
+---
+
+## 🎨 The generated layout
 
 ```text
 <div align="center">
 
-# <emoji> NomeDoApp
-## <tagline forte, em negrito>
-*<subtítulo em itálico, 3-5 palavras-chave>*
+# <emoji> AppName
+## <strong one-line tagline>
+*<italic subtitle, 3-5 keywords>*
 
 ![badge] ![badge] ![badge]
 
 </div>
 ---
-> <parágrafo de abertura: o problema que o app resolve>
+> <opening paragraph: the problem the app solves>
 ---
-## 📋 Sumário          (só se o README tiver 5+ seções)
-## ✨ Funcionalidades
-## 🧠 Como funciona
-## 📦 Instalação
-## 🚀 Uso
-## 🗂️ Estrutura do projeto
+## 📋 Table of contents      (only if the README has 5+ sections)
+## ✨ Features
+## 🧠 How it works
+## 📦 Installation
+## 🚀 Usage
+## 🗂️ Project structure
 
-<div align="center">*<fechamento curto e honesto>*</div>
+<custom sections preserved from the existing README>
+
+<div align="center">*<short, honest closing line>*</div>
 ```
 
-Regras que o comando sempre segue: nenhuma funcionalidade inventada, nenhuma seção de
-License ou Autor/Contato, nenhum badge de "tests passing"/"version"/"PRs welcome" sem uma
-CI ou versionamento público real por trás.
+Rules the skill always follows: no invented features, no License or
+Author/Contact section, no "tests passing"/"version"/"PRs welcome" badge
+without a real CI workflow or public versioning behind it.
 
 ---
 
-## 🗂️ Estrutura do projeto
+## 🗂️ Project structure
 
 ```text
 readme-style/
 ├─ .claude-plugin/
-│  ├─ plugin.json        # manifesto do plugin + wiring do hook
-│  └─ marketplace.json   # descrição do marketplace (este próprio repo)
-├─ commands/
-│  └─ apply.md           # /readme-style:apply
-└─ hooks/
-   └─ scripts/
-      └─ check-readme.mjs   # aviso de SessionStart, fail-open
+│  ├─ plugin.json         # plugin manifest + hook wiring
+│  └─ marketplace.json    # marketplace listing (this repo itself)
+├─ skills/
+│  ├─ apply/SKILL.md      # readme-style:apply
+│  └─ check/SKILL.md      # readme-style:check
+├─ hooks/
+│  ├─ hooks.json          # SessionStart wiring
+│  └─ scripts/
+│     └─ check-readme.mjs # shared logic: hook note + --report
+├─ tests/
+│  └─ check-readme.test.mjs
+└─ .github/workflows/ci.yml   # node --test + claude plugin validate --strict
 ```
 
 <div align="center">
 
-*Projeto pessoal, aberto porque pode ser útil pra mais gente.*
+*Personal project, open because it might be useful to more people.*
 
 </div>
