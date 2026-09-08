@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.5] - 2026-09-08
+
+### Added
+
+- `apply` now syncs the GitHub repo's "About" description to the README's tagline, always
+  in English. Skipped silently when there is no GitHub remote or `gh` is not authenticated.
+
 ## [0.2.4] - 2026-09-08
 
 ### Fixed
