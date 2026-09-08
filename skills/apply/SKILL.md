@@ -2,7 +2,7 @@
 name: apply
 description: Generate or update README.md in the readme-style layout (centered header, real badges, table of contents, emoji sections) from the project's actual code. Use when the user asks to write, create, generate, update, refresh, or fix a README.
 argument-hint: "[path] [instructions | --dry-run]"
-allowed-tools: Read, Write, Edit, Grep, Glob, Bash(git:*), Bash(ls:*), Bash(tree:*), Bash(find:*)
+allowed-tools: Read, Edit(README.md), Grep, Glob, Bash(git:*), Bash(ls:*), Bash(tree:*), Bash(find:*), Bash(node:*)
 ---
 
 # Apply the readme-style layout

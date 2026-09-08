@@ -2,6 +2,7 @@
 name: check
 description: Read-only check of whether the project's README.md follows the readme-style layout, listing what is missing. Use when the user asks to check, lint, or verify a README without changing it.
 argument-hint: "[path]"
+allowed-tools: Bash(node:*)
 ---
 
 # Check README.md against the readme-style layout
