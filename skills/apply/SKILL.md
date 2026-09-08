@@ -45,7 +45,7 @@ you are about to write (template plus preserved). 5 or more: include it, with an
 
 # <emoji> AppName
 
-## <strong one-line tagline>
+## <one-line tagline>
 
 *<short italic subtitle, 3-5 keywords separated by · >*
 
