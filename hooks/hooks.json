@@ -1,5 +1,5 @@
 {
-  "description": "readme-style: advisory SessionStart check. Prints a note when README.md is missing or off-layout. Never writes, never blocks.",
+  "description": "readme-style: advisory SessionStart check. Prints a note when README.md is missing or off-layout. Never writes, never blocks, silent when node is missing.",
   "hooks": {
     "SessionStart": [
       {
@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-readme.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-readme.mjs\" 2>/dev/null || true",
             "timeout": 10
           }
         ]

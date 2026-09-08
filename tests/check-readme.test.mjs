@@ -158,6 +158,10 @@ test('manifests: hooks.json wires the script on startup only and is not also lis
   const [entry] = hooks.hooks.SessionStart;
   assert.equal(entry.matcher, 'startup');
   assert.match(entry.hooks[0].command, /\$\{CLAUDE_PLUGIN_ROOT\}\/hooks\/scripts\/check-readme\.mjs/);
+  assert.match(entry.hooks[0].command, /2>\/dev\/null \|\| true$/, 'no node on PATH must stay silent and exit 0');
+  const cmd = entry.hooks[0].command.replace('${CLAUDE_PLUGIN_ROOT}', ROOT);
+  const noNode = execFileSync('/bin/sh', ['-c', cmd], { env: { PATH: '/nonexistent' }, stdio: ['ignore', 'pipe', 'pipe'] }).toString();
+  assert.equal(noNode, '');
   const marketplace = JSON.parse(fs.readFileSync(path.join(ROOT, '.claude-plugin/marketplace.json'), 'utf8'));
   assert.equal(marketplace.plugins[0].name, plugin.name);
   assert.match(fs.readFileSync(path.join(ROOT, 'CHANGELOG.md'), 'utf8'), new RegExp(`## \\[${plugin.version}\\]`));
