@@ -142,9 +142,9 @@ test('cli: fails open on an unreadable project dir', () => {
   assert.equal(out, '');
 });
 
-test('manifests: hooks.json wires the script on startup only, plugin.json points at it', () => {
+test('manifests: hooks.json wires the script on startup only and is not also listed in plugin.json', () => {
   const plugin = JSON.parse(fs.readFileSync(path.join(ROOT, '.claude-plugin/plugin.json'), 'utf8'));
-  assert.equal(plugin.hooks, './hooks/hooks.json');
+  assert.equal(plugin.hooks, undefined, 'hooks/hooks.json loads on its own; listing it again fails the plugin load');
   assert.match(plugin.version, /^\d+\.\d+\.\d+$/);
   const hooks = JSON.parse(fs.readFileSync(path.join(ROOT, 'hooks/hooks.json'), 'utf8'));
   const [entry] = hooks.hooks.SessionStart;

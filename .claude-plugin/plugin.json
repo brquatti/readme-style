@@ -9,6 +9,5 @@
   "homepage": "https://github.com/brquatti/readme-style",
   "repository": "https://github.com/brquatti/readme-style",
   "license": "MIT",
-  "keywords": ["readme", "docs", "documentation"],
-  "hooks": "./hooks/hooks.json"
+  "keywords": ["readme", "docs", "documentation"]
 }

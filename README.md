@@ -128,7 +128,7 @@ To check without changing anything:
 ```text
 readme-style/
 ├─ .claude-plugin/
-│  ├─ plugin.json         # plugin manifest (points at hooks/hooks.json)
+│  ├─ plugin.json         # plugin manifest
 │  └─ marketplace.json    # marketplace listing (this repo itself)
 ├─ skills/
 │  ├─ apply/SKILL.md      # readme-style:apply
