@@ -1,24 +1,14 @@
 {
   "name": "readme-style",
+  "displayName": "readme-style",
   "version": "0.1.0",
-  "description": "Gera e mantém README.md num padrão visual consistente (header centralizado, badges reais, sumário, seções com emoji) em qualquer projeto.",
+  "description": "Generate and maintain README.md in one consistent layout: centered header, real badges, table of contents, emoji sections. Reads the actual code, never invents features.",
   "author": {
     "name": "Bruno Quatti"
   },
+  "homepage": "https://github.com/brquatti/readme-style",
+  "repository": "https://github.com/brquatti/readme-style",
   "license": "MIT",
   "keywords": ["readme", "docs", "documentation"],
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-readme.mjs"],
-            "timeout": 10
-          }
-        ]
-      }
-    ]
-  }
+  "hooks": "./hooks/hooks.json"
 }

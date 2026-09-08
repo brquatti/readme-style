@@ -1,37 +1,132 @@
 #!/usr/bin/env node
-// readme-style — SessionStart advisory hook.
-// Only ever suggests; never writes, never blocks. Fail-open on every error.
+// readme-style — SessionStart advisory hook and `check` report.
+// Prints only. Never writes, never blocks. Fails open on every error.
+//
+//   node check-readme.mjs                  hook mode: one-line note or nothing
+//   node check-readme.mjs --report [dir]   report mode: full status for the skills
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
-try {
-  const dir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
+const CONFIG_FILE = '.readme-style.json';
 
-  const isGitRepo = fs.existsSync(path.join(dir, '.git'));
-  if (!isGitRepo) process.exit(0);
+const CHECKS = {
+  centeredHeader: (t) => t.includes('align="center"'),
+  emojiTitle: (t) => /^# \p{Extended_Pictographic}/mu.test(t),
+  badges: (t) => t.includes('img.shields.io'),
+  emojiSections: (t) => (t.match(/^## \p{Extended_Pictographic}/gmu) || []).length >= 2,
+};
 
-  const readmePath = ['README.md', 'Readme.md', 'readme.md']
-    .map((f) => path.join(dir, f))
-    .find((p) => fs.existsSync(p));
+export const LABELS = {
+  centeredHeader: 'centered header (align="center")',
+  emojiTitle: 'H1 title starting with an emoji',
+  badges: 'at least one shields.io badge',
+  emojiSections: 'at least two "## <emoji> Section" headings',
+};
 
-  if (!readmePath) {
-    process.stdout.write(
-      'Este projeto não tem README.md — rode /readme-style:apply pra gerar um no seu padrão pessoal.'
-    );
-    process.exit(0);
-  }
-
-  const head = fs.readFileSync(readmePath, 'utf8').slice(0, 3000);
-  const hasStyle = head.includes('align="center"') && head.includes('img.shields.io');
-
-  if (!hasStyle) {
-    process.stdout.write(
-      'O README deste projeto não está no seu padrão pessoal (header centralizado, badges, sumário) — rode /readme-style:apply pra atualizar.'
-    );
-  }
-
-  process.exit(0);
-} catch {
-  process.exit(0);
+export function analyze(text) {
+  const missing = Object.keys(CHECKS).filter((k) => !CHECKS[k](text));
+  return { ok: missing.length === 0, missing };
 }
+
+// Walks up from `dir` until a `.git` entry (dir or worktree file) is found.
+export function findRepoRoot(dir) {
+  let cur = path.resolve(dir);
+  for (;;) {
+    if (fs.existsSync(path.join(cur, '.git'))) return cur;
+    const parent = path.dirname(cur);
+    if (parent === cur) return null;
+    cur = parent;
+  }
+}
+
+export function loadConfig(dir) {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(path.join(dir, CONFIG_FILE), 'utf8'));
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function findReadme(dir) {
+  const names = fs.readdirSync(dir);
+  const md = names.find((n) => n.toLowerCase() === 'readme.md');
+  if (md) return { file: path.join(dir, md), markdown: true };
+  const other = names.find((n) => /^readme(\.|$)/i.test(n));
+  return other ? { file: path.join(dir, other), markdown: false } : null;
+}
+
+function isDir(p) {
+  try {
+    return fs.statSync(p).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+const NOTE_TAIL = 'Do not run it unless the user asks.';
+
+// Hook mode. Returns '' when there is nothing to say.
+export function hook(cwd, env = {}) {
+  if (env.README_STYLE_HOOK === '0') return '';
+  const root = findRepoRoot(cwd);
+  if (!root) return '';
+  if (loadConfig(root).hook === false) return '';
+
+  const readme = findReadme(root);
+  if (!readme) {
+    return `readme-style: no README.md in ${root}. The user can run /readme-style:apply to generate one. ${NOTE_TAIL}`;
+  }
+  if (!readme.markdown) return '';
+
+  const { ok, missing } = analyze(fs.readFileSync(readme.file, 'utf8'));
+  if (ok) return '';
+  const labels = missing.map((k) => LABELS[k]).join('; ');
+  return `readme-style: README.md in ${root} is not in the readme-style layout (missing: ${labels}). The user can run /readme-style:apply to update it. ${NOTE_TAIL}`;
+}
+
+// Report mode. `args` is the raw skill argument string; the first token that is an
+// existing directory becomes the target, otherwise the repo root (or cwd).
+export function report(cwd, args = '') {
+  const explicit = args
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((t) => path.resolve(cwd, t))
+    .find(isDir);
+  const target = explicit || findRepoRoot(cwd) || path.resolve(cwd);
+  const root = findRepoRoot(target);
+  const config = { ...(root ? loadConfig(root) : {}), ...loadConfig(target) };
+
+  const lines = ['readme-style report', `target: ${target}`];
+  const readme = findReadme(target);
+  if (!readme) {
+    lines.push('readme: none', 'status: missing');
+  } else if (!readme.markdown) {
+    lines.push(`readme: ${readme.file} (not Markdown; readme-style only manages README.md)`, 'status: skipped');
+  } else {
+    const { ok, missing } = analyze(fs.readFileSync(readme.file, 'utf8'));
+    lines.push(`readme: ${readme.file}`, `status: ${ok ? 'ok' : 'off-layout'}`);
+    if (!ok) lines.push(`missing: ${missing.map((k) => LABELS[k]).join('; ')}`);
+  }
+  lines.push(
+    `lang: ${config.lang || 'not set (use the existing README language, else the language the user writes in)'}`,
+    `sections: ${Array.isArray(config.sections) && config.sections.length ? config.sections.join(' | ') : 'default'}`,
+    `hook: ${config.hook === false ? 'off' : 'on'}`
+  );
+  return lines.join('\n') + '\n';
+}
+
+function main() {
+  try {
+    const argv = process.argv.slice(2);
+    const cwd = process.env.CLAUDE_PROJECT_DIR || process.cwd();
+    const out = argv[0] === '--report' ? report(cwd, argv.slice(1).join(' ')) : hook(cwd, process.env);
+    if (out) process.stdout.write(out);
+  } catch {
+    // fail open: say nothing, exit 0
+  }
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();
