@@ -34,8 +34,9 @@ trust it blindly: confirm every claim against the code and fix what is stale.
 | 🚀 Usage | 🚀 Uso |
 | 🗂️ Project structure | 🗂️ Estrutura do projeto |
 
-Table of contents heading: `📋 Table of contents` / `📋 Sumário`. Include it only when the
-README has 5 or more sections, with anchor links.
+Table of contents heading: `📋 Table of contents` / `📋 Sumário`. Count the `##` sections
+you are about to write (template plus preserved). 5 or more: include it, with anchor links.
+4 or fewer: leave it out. The five default sections alone already qualify.
 
 ## 3. Write README.md in this layout
 
@@ -85,7 +86,8 @@ README has 5 or more sections, with anchor links.
 
 - Every existing section whose heading is not in the section list (Roadmap, Contributing,
   Changelog, FAQ, ...) is kept verbatim, in its original order, after the template sections
-  and before the closing line.
+  and before the closing line. Verbatim means byte for byte: do not tick checkboxes or
+  reword items even when the code shows they are done; mention it in your report instead.
 - Never drop links, images, or examples that are still true just because they do not fit
   the template.
 
@@ -96,6 +98,9 @@ README has 5 or more sections, with anchor links.
 - Badges via `img.shields.io` only for verifiable facts: language, platform, key libraries,
   status. A CI badge only if `.github/workflows/*.yml` exists. A version badge only if there
   is a git tag or a published package version. Never "tests passing" or "PRs welcome".
+- A version number inside a badge (for example `node-≥18`) needs a source you read:
+  `engines`, a CI matrix, `.nvmrc`, `pyproject`, a lockfile. No source, no number: use the
+  bare name (`node`, `python`).
 - Empty or early-stage repo: say so in a short, honest README instead of forcing the full
   structure with empty sections.
 - Direct, confident tone. No corporate marketing.
