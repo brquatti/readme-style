@@ -58,7 +58,7 @@ readme-style: no README.md in /path/to/my-project. Run /readme-style:apply to ge
 | 🗣️ **No slash command needed** | Ask "write a README for this project" in plain language and Claude applies the skill; `/readme-style:apply` still works. |
 | 🔎 **Read-only check** | The `readme-style:check` skill reports what is missing from the current README, backed by the same script as the hook, and changes nothing. |
 | ⚙️ **Per-project config** | `/readme-style:config lang en` writes `.readme-style.json` at the repo root for you; it holds `lang`, `sections`, and `hook`. `README_STYLE_HOOK=0` silences the hook globally. |
-| 🌐 **English by default** | These READMEs are read on GitHub, so `apply` writes English unless `lang` in `.readme-style.json` says otherwise — `/readme-style:config lang pt` for a project you want in another language. |
+| 🌐 **English by default, and checked** | These READMEs are read on GitHub, so `apply` writes English unless `lang` says otherwise. The check crosses the two: a README in another language than the configured one is reported as off-layout, and `apply` rewrites it into the configured one. |
 | 🧩 **Preserves custom sections** | Roadmap, Contributing, FAQ, and any other section not part of the template are kept verbatim after the generated ones. A section that covers the same ground as a template one (Getting started, Install, Overview) is merged into it, not duplicated. |
 | 🎨 **One consistent visual style** | Centered header, real badges (no fake test/version metrics), anchored table of contents, emoji sections, `<details>` blocks for long content. |
 | 🤷 **Honest with empty repos** | An early-stage repo gets a short, honest README, not a forced structure with empty sections. |
@@ -74,8 +74,9 @@ readme-style: no README.md in /path/to/my-project. Run /readme-style:apply to ge
   the current directory to find the git repo root, checks for a `README.md`
   there (any letter case; a `README.rst` or a bare `README` is left alone), and
   looks for the layout's marks (a centered header with an emoji `# H1`, a
-  shields.io badge, at least two emoji `##` sections, and a table of contents
-  once the README has five or more sections) reading the whole file. If
+  shields.io badge, at least two emoji `##` sections, a table of contents once
+  the README has five or more sections, and the configured language) reading the
+  whole file. If
   something is missing, it emits a one-line, neutral note naming exactly what is
   missing: shown to you (`systemMessage`) and added to the model's context
   (`additionalContext`) with an instruction not to run `apply` unless asked.
@@ -179,7 +180,9 @@ Run the tests locally with `node --test tests/*.test.mjs`.
 ```
 
 - `lang` — the README language. Unset: English, regardless of the language of the
-  existing README or of your chat.
+  existing README or of your chat. The check reports a README that is not in this
+  language; `apply` rewrites it into it. Only English can be verified this way —
+  with any other `lang`, the layout is checked and the language is taken on trust.
 - `sections` — overrides the default section list and order. Keep the emoji in each
   entry: the layout check wants at least two `## <emoji> Section` headings.
 - `hook` — set to `false` to silence the `SessionStart` nudge for this repo.

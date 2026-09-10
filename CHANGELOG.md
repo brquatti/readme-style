@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.0] - 2026-09-10
+
+### Added
+
+- The check crosses the README's language with the configured one: a README in another
+  language is reported as off-layout, in the hook note and in the `check` report, and
+  `apply` rewrites it into the configured language. Only English can be verified, so with
+  any other `lang` the layout is checked and the language is taken on trust.
+
 ## [0.4.0] - 2026-09-10
 
 ### Changed

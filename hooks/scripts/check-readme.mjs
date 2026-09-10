@@ -18,6 +18,12 @@ const CONFIG_FILE = '.readme-style.json';
 const EMOJI = '(?:\\p{Extended_Pictographic}|\\p{Regional_Indicator}|[#*0-9]\\uFE0F?\\u20E3)';
 const TOC = /table of contents|sum[\u00e1a]rio/i;
 
+// Function words an English README does not use. Deliberately excludes anything that turns
+// up inside URLs or code (`com` in github.com, `de` in a path). Accurate enough only to
+// catch a whole README written in the wrong language, which is all it is asked to do.
+const NON_ENGLISH =
+  /\b(que|n[ãa]o|para|uma|voc[ê]|s[ãa]o|como|pelo|pela|tamb[ée]m|seu|sua|isso|aqui|arquivo|sobre|cada|entre|quando)\b/giu;
+
 // Titles of the `## <emoji> Title` headings, in order.
 function sectionTitles(t) {
   return [...t.matchAll(new RegExp(`^## ${EMOJI}\\s*(.*)$`, 'gmu'))].map((m) => m[1].trim());
@@ -33,6 +39,8 @@ const CHECKS = {
     const titles = sectionTitles(t);
     return titles.some((x) => TOC.test(x)) || titles.filter((x) => !TOC.test(x)).length < 5;
   },
+  // Only checked when the target language is English: see `analyze`.
+  language: (t) => (t.match(NON_ENGLISH) || []).length < 5,
 };
 
 export const LABELS = {
@@ -41,10 +49,14 @@ export const LABELS = {
   badges: 'at least one shields.io badge',
   emojiSections: 'at least two "## <emoji> Section" headings',
   tableOfContents: 'a "## <emoji> Table of contents" heading (required from 5 sections up)',
+  language: 'a README in English (run /readme-style:config lang <code> to keep another one)',
 };
 
-export function analyze(text) {
-  const missing = Object.keys(CHECKS).filter((k) => !CHECKS[k](text));
+// `lang` is the target language: the config's `lang`, English by default. Only English can
+// be verified, so for any other language the layout is checked and the language is not.
+export function analyze(text, lang = 'en') {
+  const keys = Object.keys(CHECKS).filter((k) => k !== 'language' || lang === 'en');
+  const missing = keys.filter((k) => !CHECKS[k](text));
   return { ok: missing.length === 0, missing };
 }
 
@@ -137,7 +149,7 @@ export function hook(cwd, env = {}) {
   }
   if (!readme.markdown) return '';
 
-  const { ok, missing } = analyze(fs.readFileSync(readme.file, 'utf8'));
+  const { ok, missing } = analyze(fs.readFileSync(readme.file, 'utf8'), loadConfig(root).lang);
   if (ok) return '';
   const labels = missing.map((k) => LABELS[k]).join('; ');
   return `readme-style: README.md in ${root} is not in the readme-style layout (missing: ${labels}). Run /readme-style:apply to update it.`;
@@ -158,7 +170,7 @@ export function report(cwd, args = '') {
   } else if (!readme.markdown) {
     lines.push(`readme: ${readme.file} (not Markdown; readme-style only manages README.md)`, 'status: skipped');
   } else {
-    const { ok, missing } = analyze(fs.readFileSync(readme.file, 'utf8'));
+    const { ok, missing } = analyze(fs.readFileSync(readme.file, 'utf8'), config.lang);
     lines.push(`readme: ${readme.file}`, `status: ${ok ? 'ok' : 'off-layout'}`);
     if (!ok) lines.push(`missing: ${missing.map((k) => LABELS[k]).join('; ')}`);
   }
