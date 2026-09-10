@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0] - 2026-09-10
+
+### Added
+
+- `/readme-style:config` shows the settings in effect and writes one key at a time into
+  `.readme-style.json` (`lang`, `sections`, `hook`), so the file's name and keys no longer
+  have to be remembered. Unknown keys and invalid values are rejected without writing.
+
+### Fixed
+
+- The layout check called a README `ok` while it was missing the table of contents that
+  `apply` requires from five sections up. It is now part of the check, in the hook note and
+  in the `check` report.
+
 ## [0.2.5] - 2026-09-08
 
 ### Added
