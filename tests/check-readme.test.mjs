@@ -147,7 +147,7 @@ test('report: describes status, config, and honours an explicit target dir', () 
 test('config: prints the current settings and the file it would write', () => {
   const empty = config(repo('cfg-print'));
   assert.match(empty, /file: .*\.readme-style\.json \(not created yet\)/);
-  assert.match(empty, /lang: not set/);
+  assert.match(empty, /lang: en \(default/);
   assert.match(config(repo('cfg-print2', { '.readme-style.json': '{"lang":"en"}' })), /lang: en/);
 });
 

@@ -19,8 +19,8 @@ README with the new settings.
 
 ## What each key does
 
-- `lang` — language code (`en`, `pt`, `pt-BR`) that `apply` writes the README in. Unset:
-  the existing README's language, else the language the user writes in.
+- `lang` — language code (`en`, `pt`, `pt-BR`) that `apply` writes the README in.
+  Unset: English, regardless of the language the existing README is in.
 - `sections` — the `## <emoji> Section` headings `apply` writes, in order, comma or
   `|` separated. Unset: the default set for the language.
 - `hook` — `off` silences the SessionStart note in this project. `README_STYLE_HOOK=0`

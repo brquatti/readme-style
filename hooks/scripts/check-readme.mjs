@@ -96,7 +96,7 @@ const KEYS = {
 
 function configLines(config) {
   return [
-    `lang: ${config.lang || 'not set (use the existing README language, else the language the user writes in)'}`,
+    `lang: ${config.lang || 'en (default; set another with /readme-style:config lang <code>)'}`,
     `sections: ${Array.isArray(config.sections) && config.sections.length ? config.sections.join(' | ') : 'default'}`,
     `hook: ${config.hook === false ? 'off' : 'on'}`,
   ];
