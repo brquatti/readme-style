@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 
-import { analyze, findRepoRoot, loadConfig, hook, report } from '../hooks/scripts/check-readme.mjs';
+import { analyze, findRepoRoot, loadConfig, hook, report, config } from '../hooks/scripts/check-readme.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SCRIPT = path.join(ROOT, 'hooks/scripts/check-readme.mjs');
@@ -60,6 +60,14 @@ test('analyze: flags, keycaps, ZWJ sequences, and bare symbols all count as emoj
   }
   assert.deepEqual(analyze(STYLED.replace('# 📐', '# 1')).missing, ['emojiTitle']);
   assert.doesNotMatch(fs.readFileSync(SCRIPT, 'utf8'), /\/[gimsuy]*v[gimsuy]*(?=[\s,.);])/, 'regex v flag needs Node 20; Claude Code runs on 18');
+});
+
+test('analyze: 5 or more sections require a table of contents', () => {
+  const five = STYLED + ['## 📦 Installation', '## 🗂️ Structure', '## 🧠 How it works'].join('\n\n');
+  assert.deepEqual(analyze(five).missing, ['tableOfContents']);
+  assert.equal(analyze(five.replace('## ✨', '## 📋 Table of contents\n\n## ✨')).ok, true);
+  assert.equal(analyze(five.replace('## ✨', '## 📋 Sumário\n\n## ✨')).ok, true, 'pt heading');
+  assert.equal(analyze(STYLED).ok, true, 'under 5 sections it is not required');
 });
 
 test('analyze: reads the whole file, not only the first 3000 chars', () => {
@@ -134,6 +142,51 @@ test('report: describes status, config, and honours an explicit target dir', () 
 
   assert.match(report(repo('rep-none')), /status: missing/);
   assert.match(report(repo('rep-rst', { 'README.rst': 'x' })), /status: skipped/);
+});
+
+test('config: prints the current settings and the file it would write', () => {
+  const empty = config(repo('cfg-print'));
+  assert.match(empty, /file: .*\.readme-style\.json \(not created yet\)/);
+  assert.match(empty, /lang: not set/);
+  assert.match(config(repo('cfg-print2', { '.readme-style.json': '{"lang":"en"}' })), /lang: en/);
+});
+
+test('config: writes one key without dropping the others', () => {
+  const dir = repo('cfg-set', { '.readme-style.json': '{"hook":false}' });
+  assert.match(config(dir, 'lang pt-BR'), /lang: pt-BR/);
+  config(path.join(dir), 'sections ✨ Features, 🚀 Usage');
+  assert.deepEqual(loadConfig(dir), { hook: false, lang: 'pt-BR', sections: ['✨ Features', '🚀 Usage'] });
+  config(dir, 'hook on');
+  assert.equal(loadConfig(dir).hook, true);
+  assert.match(fs.readFileSync(path.join(dir, '.readme-style.json'), 'utf8'), /\n$/);
+});
+
+test('config: writes at the repo root when run from a subdirectory', () => {
+  const dir = repo('cfg-sub', { 'packages/app/index.js': '' });
+  config(path.join(dir, 'packages/app'), 'lang en');
+  assert.equal(loadConfig(dir).lang, 'en');
+});
+
+test('config: rejects unknown keys and invalid values', () => {
+  const dir = repo('cfg-bad');
+  assert.throws(() => config(dir, 'langue en'), /unknown key/);
+  assert.throws(() => config(dir, 'lang english'), /invalid value/);
+  assert.throws(() => config(dir, 'lang'), /invalid value/);
+  assert.throws(() => config(dir, 'hook maybe'), /invalid value/);
+  assert.equal(fs.existsSync(path.join(dir, '.readme-style.json')), false, 'a rejected call writes nothing');
+});
+
+test('cli: --config exits 1 and says why on a bad key, 0 otherwise', () => {
+  const dir = repo('cfg-cli');
+  const run = (args) => {
+    const r = spawnSync('node', [SCRIPT, '--config', ...args], { cwd: dir, env: { ...process.env, CLAUDE_PROJECT_DIR: dir } });
+    return { out: r.stdout.toString(), code: r.status };
+  };
+  assert.deepEqual(run(['lang', 'en']).code, 0);
+  assert.equal(loadConfig(dir).lang, 'en');
+  const bad = run(['nope', 'x']);
+  assert.equal(bad.code, 1);
+  assert.match(bad.out, /config error: unknown key "nope"/);
 });
 
 test('cli: exits 0 and prints the note for the user and the model, honouring CLAUDE_PROJECT_DIR', () => {

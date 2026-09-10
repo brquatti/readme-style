@@ -57,7 +57,7 @@ readme-style: no README.md in /path/to/my-project. Run /readme-style:apply to ge
 | ✍️ **Generation from the real code** | The `readme-style:apply` skill reads the project's actual code (dependencies, entry points, modules, CI workflows, git tags) before writing — no invented features. It reads, never runs: no tests, no build, no CLI of yours gets executed. |
 | 🗣️ **No slash command needed** | Ask "write a README for this project" in plain language and Claude applies the skill; `/readme-style:apply` still works. |
 | 🔎 **Read-only check** | The `readme-style:check` skill reports what is missing from the current README, backed by the same script as the hook, and changes nothing. |
-| ⚙️ **Per-project config** | An optional `.readme-style.json` sets `lang`, `sections`, and `hook`; `README_STYLE_HOOK=0` silences the hook globally. |
+| ⚙️ **Per-project config** | `/readme-style:config lang en` writes `.readme-style.json` at the repo root for you; it holds `lang`, `sections`, and `hook`. `README_STYLE_HOOK=0` silences the hook globally. |
 | 🌐 **Language that follows you** | Uses `lang` from `.readme-style.json` if set, else the existing README's language, else the language you're writing in. |
 | 🧩 **Preserves custom sections** | Roadmap, Contributing, FAQ, and any other section not part of the template are kept verbatim after the generated ones. A section that covers the same ground as a template one (Getting started, Install, Overview) is merged into it, not duplicated. |
 | 🎨 **One consistent visual style** | Centered header, real badges (no fake test/version metrics), anchored table of contents, emoji sections, `<details>` blocks for long content. |
@@ -74,7 +74,8 @@ readme-style: no README.md in /path/to/my-project. Run /readme-style:apply to ge
   the current directory to find the git repo root, checks for a `README.md`
   there (any letter case; a `README.rst` or a bare `README` is left alone), and
   looks for the layout's marks (a centered header with an emoji `# H1`, a
-  shields.io badge, at least two emoji `##` sections) reading the whole file. If
+  shields.io badge, at least two emoji `##` sections, and a table of contents
+  once the README has five or more sections) reading the whole file. If
   something is missing, it emits a one-line, neutral note naming exactly what is
   missing: shown to you (`systemMessage`) and added to the model's context
   (`additionalContext`) with an instruction not to run `apply` unless asked.
@@ -89,6 +90,11 @@ readme-style: no README.md in /path/to/my-project. Run /readme-style:apply to ge
 - **`readme-style:check` skill** (`skills/check/SKILL.md`) runs the same script
   in report mode (`--report`) and relays the status, what's missing, and the
   active config, without touching any file.
+- **`readme-style:config` skill** (`skills/config/SKILL.md`) runs the same script
+  in config mode (`--config`): with no argument it prints the settings in effect,
+  with `<key> <value>` it writes that one key into `.readme-style.json` at the
+  repo root, keeping the others. An unknown key or an invalid value is rejected
+  and nothing is written.
 
 ---
 
@@ -123,6 +129,15 @@ To check without changing anything:
 /readme-style:check
 ```
 
+To see or change the settings for this project:
+
+```text
+/readme-style:config
+/readme-style:config lang en
+/readme-style:config sections ✨ Features, 🚀 Usage
+/readme-style:config hook off
+```
+
 ---
 
 ## 🗂️ Project structure
@@ -134,11 +149,12 @@ readme-style/
 │  └─ marketplace.json    # marketplace listing (this repo itself)
 ├─ skills/
 │  ├─ apply/SKILL.md      # readme-style:apply
-│  └─ check/SKILL.md      # readme-style:check
+│  ├─ check/SKILL.md      # readme-style:check
+│  └─ config/SKILL.md     # readme-style:config
 ├─ hooks/
 │  ├─ hooks.json          # SessionStart wiring
 │  └─ scripts/
-│     └─ check-readme.mjs # shared logic: hook note + --report
+│     └─ check-readme.mjs # shared logic: hook note + --report + --config
 ├─ tests/
 │  └─ check-readme.test.mjs
 ├─ CHANGELOG.md
@@ -151,7 +167,8 @@ Run the tests locally with `node --test tests/*.test.mjs`.
 
 ## ⚙️ Configuration
 
-An optional `.readme-style.json` at the repo root:
+`/readme-style:config` reads and writes it for you; it is an optional
+`.readme-style.json` at the repo root:
 
 ```json
 {
@@ -167,6 +184,9 @@ An optional `.readme-style.json` at the repo root:
   entry: the layout check wants at least two `## <emoji> Section` headings.
 - `hook` — set to `false` to silence the `SessionStart` nudge for this repo.
   `README_STYLE_HOOK=0` silences it globally, for every project.
+
+Editing the file by hand works just as well; the command exists so you don't have
+to remember the file's name or its keys.
 
 ---
 
