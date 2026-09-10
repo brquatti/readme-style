@@ -150,7 +150,10 @@ test('report: describes status, config, and honours an explicit target dir', () 
   assert.match(sub, /status: off-layout/);
   assert.match(sub, /missing: centered header/);
   assert.match(sub, /lang: en/, 'inherits the repo-root config');
-  assert.match(report(dir, 'fix the packages section'), /status: ok/, 'only the first token can be a path');
+  assert.match(report(dir, 'fix the packages section'), /status: ok/, 'free text is not a path');
+
+  const spaced = repo('rep spaced', { 'README.md': PLAIN });
+  assert.match(report(dir, spaced), new RegExp(`target: ${spaced}`), 'a path containing spaces still resolves');
 
   assert.match(report(repo('rep-none')), /status: missing/);
   assert.match(report(repo('rep-rst', { 'README.rst': 'x' })), /status: skipped/);

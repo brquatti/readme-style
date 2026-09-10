@@ -1,6 +1,6 @@
 {
   "name": "readme-style",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Generate and maintain README.md in one consistent layout: centered header, real badges, table of contents, emoji sections. Syncs the GitHub repo description to match. Reads the actual code, never invents features.",
   "author": {
     "name": "Bruno Quatti"
