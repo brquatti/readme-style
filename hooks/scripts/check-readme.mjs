@@ -155,11 +155,20 @@ export function hook(cwd, env = {}) {
   return `readme-style: README.md in ${root} is not in the readme-style layout (missing: ${labels}). Run /readme-style:apply to update it.`;
 }
 
-// Report mode. `args` is the raw skill argument string; its first token becomes the
-// target when it is an existing directory, otherwise the repo root (or cwd).
+// The whole argument string is tried first, so a path containing spaces still resolves;
+// then its first token; then the repo root of `cwd`, else `cwd` itself.
+function resolveTarget(cwd, args) {
+  const whole = args.trim();
+  if (whole && isDir(path.resolve(cwd, whole))) return path.resolve(cwd, whole);
+  const first = whole.split(/\s+/)[0];
+  if (first && isDir(path.resolve(cwd, first))) return path.resolve(cwd, first);
+  return findRepoRoot(cwd) || path.resolve(cwd);
+}
+
+// Report mode. `args` is the raw skill argument string; a leading path becomes the target,
+// otherwise the repo root (or cwd).
 export function report(cwd, args = '') {
-  const first = path.resolve(cwd, args.trim().split(/\s+/)[0] || '.');
-  const target = args.trim() && isDir(first) ? first : findRepoRoot(cwd) || path.resolve(cwd);
+  const target = resolveTarget(cwd, args);
   const root = findRepoRoot(target);
   const config = { ...(root ? loadConfig(root) : {}), ...loadConfig(target) };
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.1] - 2026-09-10
+
+### Fixed
+
+- A target path containing a space (`/Sistemas/Tech Codex/tech-codex`) resolved to its first
+  token, so `check` and `apply` silently reported on the current repo instead. The whole
+  argument is tried as a path first, then its first token.
+
 ## [0.5.0] - 2026-09-10
 
 ### Added
