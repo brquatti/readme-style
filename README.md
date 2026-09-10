@@ -58,7 +58,7 @@ readme-style: no README.md in /path/to/my-project. Run /readme-style:apply to ge
 | 🗣️ **No slash command needed** | Ask "write a README for this project" in plain language and Claude applies the skill; `/readme-style:apply` still works. |
 | 🔎 **Read-only check** | The `readme-style:check` skill reports what is missing from the current README, backed by the same script as the hook, and changes nothing. |
 | ⚙️ **Per-project config** | `/readme-style:config lang en` writes `.readme-style.json` at the repo root for you; it holds `lang`, `sections`, and `hook`. `README_STYLE_HOOK=0` silences the hook globally. |
-| 🌐 **Language that follows you** | Uses `lang` from `.readme-style.json` if set, else the existing README's language, else the language you're writing in. |
+| 🌐 **English by default** | These READMEs are read on GitHub, so `apply` writes English unless `lang` in `.readme-style.json` says otherwise — `/readme-style:config lang pt` for a project you want in another language. |
 | 🧩 **Preserves custom sections** | Roadmap, Contributing, FAQ, and any other section not part of the template are kept verbatim after the generated ones. A section that covers the same ground as a template one (Getting started, Install, Overview) is merged into it, not duplicated. |
 | 🎨 **One consistent visual style** | Centered header, real badges (no fake test/version metrics), anchored table of contents, emoji sections, `<details>` blocks for long content. |
 | 🤷 **Honest with empty repos** | An early-stage repo gets a short, honest README, not a forced structure with empty sections. |
@@ -178,8 +178,8 @@ Run the tests locally with `node --test tests/*.test.mjs`.
 }
 ```
 
-- `lang` — forces the README language (otherwise: existing README language,
-  then the language you write in, as above).
+- `lang` — the README language. Unset: English, regardless of the language of the
+  existing README or of your chat.
 - `sections` — overrides the default section list and order. Keep the emoji in each
   entry: the layout check wants at least two `## <emoji> Section` headings.
 - `hook` — set to `false` to silence the `SessionStart` nudge for this repo.

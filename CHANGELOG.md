@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0] - 2026-09-10
+
+### Changed
+
+- `apply` writes English by default. It used to follow the existing README's language, then
+  the language of the chat, which quietly produced non-English READMEs on public repos. A
+  project that wants another language sets it once: `/readme-style:config lang pt`.
+
 ## [0.3.0] - 2026-09-10
 
 ### Added

@@ -22,8 +22,9 @@ trust it blindly: confirm every claim against the code and fix what is stale.
 
 ## 2. Pick language and sections
 
-- Language: `lang` from the report if set; else the language of the existing README; else
-  the language the user is writing in.
+- Language: `lang` from the report if set; else English, regardless of the language of the
+  existing README or of the user. English is the default on purpose: these READMEs are read
+  on GitHub. Rewriting an existing README into English is expected, not a mistake.
 - Sections: `sections` from the report if set; else the defaults below, in this order.
 
 | default (en) | default (pt) |
