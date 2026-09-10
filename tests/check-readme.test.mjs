@@ -70,6 +70,18 @@ test('analyze: 5 or more sections require a table of contents', () => {
   assert.equal(analyze(STYLED).ok, true, 'under 5 sections it is not required');
 });
 
+test('analyze: a README in the wrong language fails, unless lang says otherwise', () => {
+  const pt = STYLED
+    .replace('## Tagline', '## Extrai o DNA de um moodboard')
+    .replace('## ✨ Features', '## ✨ Funcionalidades\n\nCada arquivo que você sobe é lido aqui, para que não seja preciso repetir isso quando ele estiver pronto.')
+    .replace('## 🚀 Usage', '## 🚀 Uso\n\nSobre como cada entrada é tratada.');
+  assert.deepEqual(analyze(pt).missing, ['language']);
+  assert.equal(analyze(pt, 'pt').ok, true, 'lang: pt checks the layout, not the language');
+  assert.equal(analyze(pt, 'pt-BR').ok, true);
+  assert.equal(analyze(STYLED).ok, true, 'an English README is not flagged');
+  assert.equal(analyze(STYLED + '\n<https://github.com/me/repo.com> `de` `com`\n').ok, true, 'URLs and code are not Portuguese');
+});
+
 test('analyze: reads the whole file, not only the first 3000 chars', () => {
   const late = '# intro\n\n' + 'a'.repeat(3100) + '\n\n' + STYLED;
   assert.equal(analyze(late).ok, true);
